@@ -1,0 +1,245 @@
+
+import tkinter as tk
+from tkinter import messagebox
+import pickle
+
+# Simulated database for users (you can replace it with a real database if needed)
+USER_DB_FILE = "user_data.pkl"
+
+
+# Function to save users to a file
+def save_users(users):
+    with open(USER_DB_FILE, "wb") as file:
+        pickle.dump(users, file)
+
+
+# Function to load users from a file
+def load_users():
+    try:
+        with open(USER_DB_FILE, "rb") as file:
+            return pickle.load(file)
+    except FileNotFoundError:
+        return {}
+
+
+# Function to clear the window (remove all widgets)
+def clear_window():
+    for widget in window.winfo_children():
+        widget.destroy()
+
+
+# Function to create an oval-shaped button using Canvas
+def create_oval_button(parent, text, command, width, height, bg_color, fg_color):
+    canvas = tk.Canvas(parent, width=width, height=height, bg=bg_color, bd=0, highlightthickness=0)
+    canvas.create_oval(10, 10, width-10, height-10, fill=bg_color, outline=bg_color)
+    canvas.create_text(width//2, height//2, text=text, font=("Times New Roman", 14), fill=fg_color)
+    canvas.bind("<Button-1>", command)
+    canvas.pack(pady=10)
+    return canvas
+
+
+# Function to show the main login/registration page
+def show_main_page(event=None):
+    clear_window()
+
+    window.config(bg="#121212")  # Dark background similar to Spotify
+
+    # Main Heading
+    label = tk.Label(window, text="Welcome to Hospital System", font=("Times New Roman", 20, "bold"), fg="white", bg="#121212")
+    label.pack(pady=50)
+
+    create_oval_button(window, "Create Account", lambda event: show_register_page(), 200, 50, "#1DB954", "white")
+    create_oval_button(window, "Login", lambda event: show_login_page(), 200, 50, "#1DB954", "white")
+
+
+# Function to handle user registration
+def show_register_page(event=None):
+    clear_window()
+
+    window.config(bg="#121212")
+
+    label_username = tk.Label(window, text="Username:", font=("Times New Roman", 12), fg="white", bg="#121212")
+    label_username.pack(pady=10)
+    entry_username = tk.Entry(window, font=("Times New Roman", 12), bg="#333333", fg="white", bd=0, relief="flat")
+    entry_username.pack(pady=5)
+
+    label_password = tk.Label(window, text="Password:", font=("Times New Roman", 12), fg="white", bg="#121212")
+    label_password.pack(pady=10)
+    entry_password = tk.Entry(window, show="*", font=("Times New Roman", 12), bg="#333333", fg="white", bd=0, relief="flat")
+    entry_password.pack(pady=5)
+
+    def save_account(event=None):
+        username = entry_username.get()
+        password = entry_password.get()
+
+        if username == "" or password == "":
+            messagebox.showerror("Error", "All fields are required")
+            return
+        
+        users = load_users()
+
+        if username in users:
+            messagebox.showerror("Error", "Username already exists")
+        else:
+            users[username] = password
+            save_users(users)
+            messagebox.showinfo("Success", "Account created successfully")
+            show_login_page()
+
+    create_oval_button(window, "Create Account", save_account, 200, 50, "#1DB954", "white")
+    create_oval_button(window, "Back", lambda event: show_main_page(), 200, 50, "#333333", "white")
+
+
+# Function to handle user login
+def show_login_page(event=None):
+    clear_window()
+
+    window.config(bg="#121212")
+
+    label_username = tk.Label(window, text="Username:", font=("Times New Roman", 12), fg="white", bg="#121212")
+    label_username.pack(pady=10)
+    entry_username = tk.Entry(window, font=("Times New Roman", 12), bg="#333333", fg="white", bd=0, relief="flat")
+    entry_username.pack(pady=5)
+
+    label_password = tk.Label(window, text="Password:", font=("Times New Roman", 12), fg="white", bg="#121212")
+    label_password.pack(pady=10)
+    entry_password = tk.Entry(window, show="*", font=("Times New Roman", 12), bg="#333333", fg="white", bd=0, relief="flat")
+    entry_password.pack(pady=5)
+
+    def verify_login(event=None):
+        username = entry_username.get()
+        password = entry_password.get()
+
+        if username == "" or password == "":
+            messagebox.showerror("Error", "All fields are required")
+            return
+        
+        users = load_users()
+
+        if username in users and users[username] == password:
+            messagebox.showinfo("Success", "Login successful")
+            show_hospital_details()
+        else:
+            messagebox.showerror("Error", "Invalid credentials")
+
+    create_oval_button(window, "Login", verify_login, 200, 50, "#1DB954", "white")
+    create_oval_button(window, "Back", lambda event: show_main_page(), 200, 50, "#333333", "white")
+
+
+# Function to show hospital details after login
+def show_hospital_details(event=None):
+    clear_window()
+
+    window.config(bg="#121212")
+
+    # Hospital details
+    label_hospital_name = tk.Label(window, text="XYZ Hospital", font=("Times New Roman", 24, "bold"), fg="white", bg="#121212")
+    label_hospital_name.pack(pady=10)
+
+    label_tagline = tk.Label(window, text="Your Health, Our Priority", font=("Times New Roman", 18, "italic"), fg="white", bg="#121212")
+    label_tagline.pack(pady=5)
+
+    label_hours = tk.Label(window, text="Operational Hours: 24/7", font=("Times New Roman", 14), fg="white", bg="#121212")
+    label_hours.pack(pady=5)
+
+    label_branches = tk.Label(window, text="Branches:", font=("Times New Roman", 16, "bold"), fg="white", bg="#121212")
+    label_branches.pack(pady=5)
+
+    branches_text = (
+        "1. Main Branch: 123 Hospital Street, Downtown\n"
+        "2. North Branch: 456 North Avenue, Uptown\n"
+        "3. West Branch: 789 West Road, Suburbs\n"
+        "4. East Branch: 101 East Blvd, City Center"
+    )
+    label_branches_details = tk.Label(window, text=branches_text, font=("Times New Roman", 12), fg="white", bg="#121212")
+    label_branches_details.pack(pady=10)
+
+    label_contact = tk.Label(window, text="Contact Information:", font=("Times New Roman", 16, "bold"), fg="white", bg="#121212")
+    label_contact.pack(pady=5)
+
+    contact_info = (
+        "Main Phone: +1 123 456 7890\n"
+        "Emergency: +1 800 123 4567\n"
+        "Fax: +1 123 456 7891"
+    )
+    label_contact_details = tk.Label(window, text=contact_info, font=("Times New Roman", 12), fg="white", bg="#121212")
+    label_contact_details.pack(pady=10)
+
+    label_address = tk.Label(window, text="Main Address: 123 Hospital Street, Downtown, City", font=("Times New Roman", 14), fg="white", bg="#121212")
+    label_address.pack(pady=10)
+
+    # Add buttons for "Departments" and "Doctors"
+    create_oval_button(window, "Departments", show_departments, 200, 50, "#1DB954", "white")
+    create_oval_button(window, "Doctors & Book Appointment", show_doctors, 200, 50, "#1DB954", "white")
+    
+    create_oval_button(window, "Back to Main Page", lambda event: show_main_page(), 200, 50, "#333333", "white")
+
+
+# Function to show hospital departments
+def show_departments(event=None):
+    clear_window()
+
+    window.config(bg="#121212")
+
+    label_departments = tk.Label(window, text="Departments at XYZ Hospital", font=("Times New Roman", 20, "bold"), fg="white", bg="#121212")
+    label_departments.pack(pady=10)
+
+    departments_text = (
+        "1. Cardiology\n"
+        "2. Neurology\n"
+        "3. Orthopedics\n"
+        "4. Pediatrics\n"
+        "5. Radiology\n"
+        "6. Dermatology"
+    )
+    label_departments_list = tk.Label(window, text=departments_text, font=("Times New Roman", 14), fg="white", bg="#121212")
+    label_departments_list.pack(pady=10)
+
+    create_oval_button(window, "Back to Hospital Details", lambda event: show_hospital_details(), 200, 50, "#1DB954", "white")
+
+
+# Function to show available doctors and allow booking
+def show_doctors(event=None):
+    clear_window()
+
+    window.config(bg="#121212")
+
+    label_doctors = tk.Label(window, text="Doctors at XYZ Hospital", font=("Times New Roman", 20, "bold"), fg="white", bg="#121212")
+    label_doctors.pack(pady=10)
+
+    doctors_text = (
+        "1. Dr. John Smith - Cardiologist\n"
+        "2. Dr. Emily Davis - Neurologist\n"
+        "3. Dr. Michael Brown - Orthopedic Surgeon\n"
+        "4. Dr. Sarah Wilson - Pediatrician"
+    )
+    label_doctors_list = tk.Label(window, text=doctors_text, font=("Times New Roman", 14), fg="white", bg="#121212")
+    label_doctors_list.pack(pady=10)
+
+    def book_appointment():
+        messagebox.showinfo("Booking", "Appointment booked successfully!")
+
+    create_oval_button(window, "Book Appointment", book_appointment, 200, 50, "#1DB954", "white")
+    create_oval_button(window, "Back to Hospital Details", lambda event: show_hospital_details(), 200, 50, "#1DB954", "white")
+
+
+# Main window setup
+window = tk.Tk()
+window.title("Hospital System")
+
+# Set the size of the window
+window_width = 600
+window_height = 400
+screen_width = window.winfo_screenwidth()
+screen_height = window.winfo_screenheight()
+position_top = int(screen_height / 2 - window_height / 2)
+position_right = int(screen_width / 2 - window_width / 2)
+window.geometry(f'{window_width}x{window_height}+{position_right}+{position_top}')
+
+# Set the main window background to black (Spotify theme)
+window.config(bg="#121212")
+
+# Show the main page initially
+show_main_page()
+
+window.mainloop()
